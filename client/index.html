@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/codemirror.css"
+    />
+    <link
+      rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/theme/midnight.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/codemirror.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/mode/xml/xml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/mode/css/css.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/mode/javascript/javascript.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/mode/htmlmixed/htmlmixed.js"></script>
+    <title>Programming language translator</title>
+  </head>
+  <body
+    class="w-screen h-screen bg-[#0B2447] flex flex-col justify-start items-center p-4"
+  >
+    <h1
+      class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-white md:text-5xl lg:text-6xl"
+    >
+      Programming language translator
+    </h1>
+    <p
+      class="mb-6 text-lg font-normal text-gray-200 lg:text-xl sm:px-16 xl:px-48"
+    >
+      using OpenAI
+    </p>
+    <div class="flex gap-4 h-full w-full">
+      <div class="from w-1/2 h-full flex flex-col justify-center items-center">
+        <div class="flex w-full gap-4 justify-center items-end mb-2">
+          <label
+            for="from_languages"
+            class="mb-2 text-sm font-medium text-white"
+            >Source language:</label
+          >
+          <select
+            id="from_languages"
+            class="w-36 border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="ruby">Ruby</option>
+            <option value="php">PHP</option>
+            <option value="csharp">C#</option>
+          </select>
+        </div>
+        <textarea
+          class="w-full h-full"
+          name="from"
+          id="from_textarea"
+        ></textarea>
+      </div>
+      <div class="circle-button">
+        <img
+          src="https://openai.com/favicon.ico"
+          alt="OpenAI Logo"
+          id="translate"
+        />
+      </div>
+
+      <div class="from w-1/2 h-full flex flex-col justify-center items-center">
+        <div class="flex w-full gap-4 justify-center items-end mb-2">
+          <label for="to_languages" class="mb-2 text-sm font-medium text-white"
+            >Translate to:</label
+          >
+          <select
+            id="to_languages"
+            class="w-36 border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="python">Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="java">Java</option>
+            <option value="ruby">Ruby</option>
+            <option value="php">PHP</option>
+            <option value="csharp">C#</option>
+          </select>
+        </div>
+        <textarea class="w-full h-full" name="to" id="to_textarea"></textarea>
+      </div>
+    </div>
+    <script>
+      const from_textarea = document.getElementById("from_textarea");
+      const to_textarea = document.getElementById("to_textarea");
+      const from_languages = document.getElementById("from_languages");
+      const to_languages = document.getElementById("to_languages");
+      const translate = document.getElementById("translate");
+
+      const from_language = from_languages.value;
+      const to_language = to_languages.value;
+
+      // from_textarea editor
+      const from_editor = CodeMirror.fromTextArea(from_textarea, {
+        lineNumbers: true,
+        mode: from_language,
+        theme: "midnight",
+      });
+
+      // to_textarea editor
+      const to_editor = CodeMirror.fromTextArea(to_textarea, {
+        lineNumbers: true,
+        mode: to_language,
+        theme: "midnight",
+        readOnly: true,
+      });
+
+      translate.addEventListener("click", async () => {
+        translate.classList.add("spin-animation");
+        const from_language = from_languages.value;
+        const to_language = to_languages.value;
+
+        to_editor.setValue("");
+        const code = from_editor.getValue();
+        const code_lines = code.split(/\r?\n/);
+        console.log(code_lines);
+
+        try {
+          const response = await fetch("/translate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from: from_language,
+              to: to_language,
+              code: code_lines,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const translation = await response.json();
+          const result_code = translation.data.replace(
+            /(?<=[\):;\,{}\b<?php\b]),/gi,
+            "\n"
+          );
+          to_editor.setValue(result_code);
+          translate.classList.remove("spin-animation");
+        } catch (error) {
+          console.error(error);
+        }
+      });
+    </script>
+  </body>
+</html>

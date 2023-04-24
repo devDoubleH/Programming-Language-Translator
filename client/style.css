@@ -1,0 +1,60 @@
+.CodeMirror {
+  height: 100% !important;
+  width: 100% !important;
+  background-color: #1d2028 !important;
+  /* color: #f0f0f0 !important; */
+}
+
+.CodeMirror-scroll {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.CodeMirror-gutters {
+  background-color: #1d2028 !important;
+  color: #f0f0f0 !important;
+}
+
+.CodeMirror-linenumber {
+  color: #5c6773 !important;
+}
+
+.CodeMirror-cursor {
+  border-left: 1px solid #f0f0f0 !important;
+}
+
+.CodeMirror-selected {
+  background-color: #2f3241 !important;
+}
+
+.circle-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 100px;
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  z-index: 999;
+  cursor: pointer;
+}
+
+.circle-button img {
+  width: 60px;
+  height: 60px;
+  border-radius: 100px;
+  border: 1px solid #fff;
+}
+
+.spin-animation {
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

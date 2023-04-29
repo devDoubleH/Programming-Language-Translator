@@ -53,4 +53,7 @@ app
     const result = await response(from, to, code);
     res.status(200).json({ data: result });
   })
-  .listen(3000);
+  .listen(
+    3000,
+    console.log(`app is running on port 3000 http://localhost:3000`)
+  );

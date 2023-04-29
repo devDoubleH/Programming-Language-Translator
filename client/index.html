@@ -98,6 +98,8 @@
       const from_language = from_languages.value;
       const to_language = to_languages.value;
 
+      console.log(from_language, to_language);
+
       // from_textarea editor
       const from_editor = CodeMirror.fromTextArea(from_textarea, {
         lineNumbers: true,
@@ -142,7 +144,7 @@
 
           const translation = await response.json();
           const result_code = translation.data.replace(
-            /(?<=[\):;\,{}\b<?php\b]),/gi,
+            /(?!\B"[^"]*),(?![^"]*"\B)/gi,
             "\n"
           );
           to_editor.setValue(result_code);

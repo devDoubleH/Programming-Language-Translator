@@ -38,7 +38,7 @@
     class="w-screen h-screen bg-[#0B2447] flex flex-col justify-start items-center p-4"
   >
     <h1
-      class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-white md:text-5xl lg:text-6xl"
+      class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-white md:text-5xl lg:text-6xl max-sm:text-2xl"
     >
       Programming language translator
     </h1>
@@ -47,14 +47,26 @@
     >
       using OpenAI
     </p>
-    <input
-      type="text"
-      class="w-1/3 mb-4 h-10 rounded-lg px-4 outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
-      placeholder="Enter your API key"
-      id="api_key"
-    />
-    <div class="flex gap-4 h-full w-full">
-      <div class="from w-1/2 h-full flex flex-col justify-center items-center">
+    <div class="flex w-full justify-center items-center h-20 gap-2 mb-2">
+      <input
+        type="text"
+        class="w-1/3 h-10 rounded-lg px-4 outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+        placeholder="Enter your API key"
+        id="api_key"
+      />
+      <img
+        src="https://openai.com/favicon.ico"
+        alt="OpenAI Logo"
+        id="translate"
+        class="mobile-translate"
+      />
+    </div>
+    <div
+      class="flex gap-4 h-full w-full max-sm:flex-col max-sm:justify-center max-sm:items-center"
+    >
+      <div
+        class="from w-1/2 h-full flex flex-col justify-center items-center max-sm:w-full"
+      >
         <div class="flex w-full gap-4 justify-center items-end mb-2">
           <label
             for="from_languages"
@@ -86,8 +98,9 @@
           id="translate"
         />
       </div>
-
-      <div class="from w-1/2 h-full flex flex-col justify-center items-center">
+      <div
+        class="from w-1/2 h-full flex flex-col justify-center items-center max-sm:w-full"
+      >
         <div class="flex w-full gap-4 justify-center items-end mb-2">
           <label for="to_languages" class="mb-2 text-sm font-medium text-white"
             >Translate to:</label

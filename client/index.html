@@ -14,11 +14,24 @@
       rel="stylesheet"
       href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/theme/midnight.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css"
+      integrity="sha512-O03ntXoVqaGUTAeAmvQ2YSzkCvclZEcPQu1eqloPaHfJ5RuNGiS4l+3duaidD801P50J28EHyonCV06CUlTSag=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/codemirror.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/mode/xml/xml.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/mode/css/css.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/mode/javascript/javascript.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/mode/htmlmixed/htmlmixed.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"
+      integrity="sha512-Zq9o+E00xhhR/7vJ49mxFNJ0KQw1E1TMWkPTxrWcnpfEFDEXgUiwJHIKit93EW/XxE31HSI5GEOW06G6BF1AtA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
     <title>Programming language translator</title>
   </head>
   <body
@@ -34,6 +47,12 @@
     >
       using OpenAI
     </p>
+    <input
+      type="text"
+      class="w-1/3 mb-4 h-10 rounded-lg px-4 outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+      placeholder="Enter your API key"
+      id="api_key"
+    />
     <div class="flex gap-4 h-full w-full">
       <div class="from w-1/2 h-full flex flex-col justify-center items-center">
         <div class="flex w-full gap-4 justify-center items-end mb-2">
@@ -94,20 +113,18 @@
       const from_languages = document.getElementById("from_languages");
       const to_languages = document.getElementById("to_languages");
       const translate = document.getElementById("translate");
+      const api_key = document.getElementById("api_key");
 
       const from_language = from_languages.value;
       const to_language = to_languages.value;
+      const api_key_value = api_key.value;
 
-      console.log(from_language, to_language);
-
-      // from_textarea editor
       const from_editor = CodeMirror.fromTextArea(from_textarea, {
         lineNumbers: true,
         mode: from_language,
         theme: "midnight",
       });
 
-      // to_textarea editor
       const to_editor = CodeMirror.fromTextArea(to_textarea, {
         lineNumbers: true,
         mode: to_language,
@@ -123,35 +140,64 @@
         to_editor.setValue("");
         const code = from_editor.getValue();
         const code_lines = code.split(/\r?\n/);
-        console.log(code_lines);
 
-        try {
-          const response = await fetch("/translate", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              from: from_language,
-              to: to_language,
-              code: code_lines,
-            }),
+        if (!api_key_value) {
+          iziToast.error({
+            title: "Error",
+            message: "No api key!",
+            position: "topCenter",
+            timeout: 5000,
+            progressBarColor: "red",
+            closeOnClick: true,
           });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const translation = await response.json();
-          const result_code = translation.data.replace(
-            /(?!\B"[^"]*),(?![^"]*"\B)/gi,
-            "\n"
-          );
-          to_editor.setValue(result_code);
-          translate.classList.remove("spin-animation");
-        } catch (error) {
-          console.error(error);
         }
+
+        fetch("/translate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: from_language,
+            to: to_language,
+            code: code_lines,
+            api_key: api_key_value,
+          }),
+        })
+          .then(async (response) => {
+            const translation = await response.json();
+
+            if (!response.ok) {
+              iziToast.error({
+                title: "Error",
+                message: translation.message,
+                position: "top",
+                timeout: 5000,
+                progressBarColor: "red",
+                closeOnClick: true,
+              });
+              translate.classList.remove("spin-animation");
+              return;
+            }
+
+            const result_code = translation.data.replace(
+              /(?!\B"[^"]*),(?![^"]*"\B)/gi,
+              "\n"
+            );
+            to_editor.setValue(result_code);
+            translate.classList.remove("spin-animation");
+          })
+          .catch((error) => {
+            iziToast.error({
+              title: "Error",
+              message: translation.message,
+              position: "topRight",
+              timeout: 5000,
+              progressBarColor: "red",
+              closeOnClick: true,
+            });
+            translate.classList.remove("spin-animation");
+          });
       });
     </script>
   </body>

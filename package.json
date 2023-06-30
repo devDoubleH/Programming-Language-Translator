@@ -8,8 +8,8 @@
     "node": "14.x"
   },
   "scripts": {
-    "start": "nodemon app.js",
-    "dev": "node app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "dependencies": {
     "@types/express": "^4.17.17",

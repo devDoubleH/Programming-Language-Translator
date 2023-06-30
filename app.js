@@ -18,26 +18,6 @@ app.use(
   express.static(path.dirname(new URL(import.meta.url).pathname) + "/client")
 );
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const openai = new OpenAIApi(configuration);
-
-const response = async (from, to, code) => {
-  let res = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: `##### Translate this function from ${from} into ${to}\n\n### ${from}\n\n${code}\n\n### ${to}\n\n`,
-    temperature: 0,
-    max_tokens: 2048,
-    top_p: 1.0,
-    frequency_penalty: 0.0,
-    presence_penalty: 0.0,
-    stop: ["###"],
-  });
-  return res.data.choices[0].text;
-};
-
 app.get("/", (req, res) => {
   const indexFile =
     path.dirname(new URL(import.meta.url).pathname) + "/client/index.html";
@@ -46,12 +26,30 @@ app.get("/", (req, res) => {
 
 app
   .post("/translate", async (req, res) => {
-    const { from, to, code } = req.body;
-    console.log("from: " + from);
-    console.log("to: " + to);
-    console.log("code: " + code);
-    const result = await response(from, to, code);
-    res.status(200).json({ data: result });
+    const { from, to, code, api_key } = req.body;
+
+    const configuration = new Configuration({
+      apiKey: api_key,
+    });
+
+    const openai = new OpenAIApi(configuration);
+
+    try {
+      let res = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `##### Translate this function from ${from} into ${to}\n\n### ${from}\n\n${code}\n\n### ${to}\n\n`,
+        temperature: 0,
+        max_tokens: 2048,
+        top_p: 1.0,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0,
+        stop: ["###"],
+      });
+      res.status(200).send(res.data.choices[0].text);
+    } catch (error) {
+      console.log(error.response);
+      res.status(error.response.status).json(error.response.data.error);
+    }
   })
   .listen(
     3000,

@@ -70,3 +70,9 @@
     display: none;
   }
 }
+
+@media (min-width: 650px) {
+  .mobile-translate {
+    display: none;
+  }
+}
